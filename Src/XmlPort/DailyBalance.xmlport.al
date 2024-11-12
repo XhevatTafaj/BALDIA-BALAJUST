@@ -5,6 +5,7 @@ xmlport 50502 "DailyBalanceXMLport1"
     TextEncoding = UTF8;
     Direction = Export;
     TableSeparator = '<NewLine>';
+
     schema
     {
         textelement(Root)
@@ -16,29 +17,29 @@ xmlport 50502 "DailyBalanceXMLport1"
                     trigger OnBeforePassVariable()
                     var
                         CurrentDate: Date;
-                        Value: Text[8];
+                        Value: Text[8]; // Declare Value as a Text variable
                     begin
                         CurrentDate := Today();
-                        Value := Format(CurrentDate, 0, 'yyyyMMdd');
+                        Date := Format(CurrentDate, 0, '<Year4><Month,2><Day,2>'); // Assign formatted date to Value
                     end;
                 }
-
-                textelement("Account")
+                fieldelement(Account; GLAccount."No.")
                 {
-                    trigger OnBeforePassVariable()
+                    trigger OnBeforePassField()
                     var
                         Value: Text[7];
                     begin
                         Value := Format(GLAccount."No.", 7, '0');
                     end;
                 }
-                /* textelement("Center")
+                textelement("Center")
                 {
                     trigger OnBeforePassVariable()
                     var
                         Value: Text[4];
                     begin
-                        Value := '0001';
+                        Value := '001';
+                        Center := Format(Value);
                     end;
                 }
                 textelement("Currency")
@@ -48,17 +49,19 @@ xmlport 50502 "DailyBalanceXMLport1"
                         Value: Text[3];
                     begin
                         Value := 'EUR';
+                        Currency := Format(Value);
                     end;
-                } */
+                }
 
-                textelement("Balance")
+                fieldelement(Balance; GLAccount.Balance)
                 {
-                    trigger OnBeforePassVariable()
+                    trigger OnBeforePassField()
                     var
                         Value: Text[18];
                     begin
                         Value := FORMAT(GLAccount."Balance", 0, '###########0.00');
                         Value := PadStr(Value, 18, '0');
+
                     end;
                 }
             }
