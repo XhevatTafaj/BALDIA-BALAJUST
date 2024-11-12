@@ -54,23 +54,9 @@ xmlport 50503 "MonthlyBalanceXMLport1"
                 {
                     trigger OnBeforePassVariable()
                     var
-                        GLEntryRec: Record "G/L Entry";
-                        BalanceAmount: Decimal;
-                        StartDate, EndDate : Date;
                         Value: Text[18];
                     begin
-                        BalanceAmount := 0;
-                        StartDate := CALCDATE('<-1M>', Today());
-                        EndDate := GetBalanceDate(Today());
-                        GLEntryRec.SetRange("G/L Account No.", GLAccount."No.");
-                        GLEntryRec.SetRange("Posting Date", StartDate, EndDate);
-
-                        if GLEntryRec.FindSet() then
-                            repeat
-                                BalanceAmount += GLEntryRec."Amount";
-                            until GLEntryRec.Next() = 0;
-
-                        Value := FORMAT(ROUND(BalanceAmount, 0.01), 0, '###########0.00');
+                        Value := FORMAT(GLAccount."Balance", 0, '###########0.00');
                         Value := PadStr(Value, 18, '0');
                     end;
                 }

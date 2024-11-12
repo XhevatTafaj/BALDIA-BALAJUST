@@ -55,18 +55,9 @@ xmlport 50502 "DailyBalanceXMLport1"
                 {
                     trigger OnBeforePassVariable()
                     var
-                        GLEntryRec: Record "G/L Entry";
-                        BalanceAmount: Decimal;
                         Value: Text[18];
                     begin
-                        BalanceAmount := 0;
-                        GLEntryRec.SetRange("G/L Account No.", GLAccount."No.");
-                        if GLEntryRec.FindSet() then
-                            repeat
-                                BalanceAmount += GLEntryRec."Amount";
-                            until GLEntryRec.Next() = 0;
-
-                        Value := FORMAT(ROUND(BalanceAmount, 0.01), 0, '###########0.00');
+                        Value := FORMAT(GLAccount."Balance", 0, '###########0.00');
                         Value := PadStr(Value, 18, '0');
                     end;
                 }
