@@ -17,10 +17,10 @@ xmlport 50502 "DailyBalanceXMLport1"
                     trigger OnBeforePassVariable()
                     var
                         CurrentDate: Date;
-                        Value: Text[8]; // Declare Value as a Text variable
+                        Value: Text[8];
                     begin
                         CurrentDate := Today();
-                        Date := Format(CurrentDate, 0, '<Year4><Month,2><Day,2>'); // Assign formatted date to Value
+                        Date := Format(CurrentDate, 0, '<Year4><Month,2><Day,2>');
                     end;
                 }
                 fieldelement(Account; GLAccount."No.")
