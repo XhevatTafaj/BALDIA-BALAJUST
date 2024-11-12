@@ -66,16 +66,14 @@ xmlport 50500 "DailyBalanceXMLport"
             {
                 group("BalanceExportGroup")
                 {
-                    // Campo per la data di esportazione
                     field("ExportDate"; Today())
                     {
-                        Caption = 'Export Date'; // Etichetta per il campo
+                        Caption = 'Export Date';
                     }
 
-                    // Nome del file dinamico basato sulla data
                     field("FileName"; 'DAILY_BALANCE_' + Format(Today(), 0, 'yyyyMMdd') + '.txt')
                     {
-                        Caption = 'File Name'; // Etichetta per il campo
+                        Caption = 'File Name';
                     }
                 }
             }
