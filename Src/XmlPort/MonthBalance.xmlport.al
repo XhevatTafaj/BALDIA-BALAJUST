@@ -1,4 +1,4 @@
-xmlport 50501 "BalajustXMLport"
+xmlport 50503 "MonthlyBalanceXMLport1"
 {
     Format = VariableText;
     TextEncoding = UTF8;
@@ -6,55 +6,74 @@ xmlport 50501 "BalajustXMLport"
     TableSeparator = '<NewLine>';
     schema
     {
-        textelement("BalajustData")
+        textelement(Root)
         {
-            textelement("Date")
+            tableelement("GLAccount"; "G/L Account")
             {
-                trigger OnBeforePassVariable()
-                var
-                    LastMonthDate: Date;
-                begin
-                    LastMonthDate := CALCDATE('<-1M>', Today());
-                    LastMonthDate := CALCDATE('<<1D>', LastMonthDate);
-                    Value := Format(LastMonthDate, 0, '<Year><Month><Day>');
-                end;
-            }
-            textelement("Account")
-            {
-                trigger OnBeforePassVariable()
-                begin
-                    Value := '1234567';
-                end;
-            }
-            textelement("Center")
-            {
-                trigger OnBeforePassVariable()
-                begin
-                    Value := '0001';
-                end;
-            }
-            textelement("Currency")
-            {
-                trigger OnBeforePassVariable()
-                begin
-                    Value := 'EUR';
-                end;
-            }
-            textelement("Balance")
-            {
-                trigger OnBeforePassVariable()
-                var
-                    BalanceAmount: Decimal;
-                    TempBalance: Text[18];
-                    BalanceFormatted: Text[18];
-                begin
-                    BalanceAmount := 123456789012345.67;
-                    TempBalance := Format(BalanceAmount, 0, '0.00');
+                textelement("Date")
+                {
+                    trigger OnBeforePassVariable()
+                    var
+                        BalanceDate: Date;
+                        Value: Text[8];
+                    begin
+                        BalanceDate := GetBalanceDate(Today());
+                        Value := Format(BalanceDate, 0, 'yyyyMMdd');
+                    end;
+                }
 
-                    BalanceFormatted := PadStr(TempBalance, 18, ' ');
+                textelement("Account")
+                {
+                    trigger OnBeforePassVariable()
+                    var
+                        Value: Text[7];
+                    begin
+                        Value := Format(GLAccount."No.", 7, '0');
+                    end;
+                }
+                /* textelement("Center")
+                {
+                    trigger OnBeforePassVariable()
+                    var
+                        Value: Text[4];
+                    begin
+                        Value := '0001';
+                    end;
+                }
+                textelement("Currency")
+                {
+                    trigger OnBeforePassVariable()
+                    var
+                        Value: Text[3];
+                    begin
+                        Value := 'EUR';
+                    end;
+                } */
 
-                    Value := BalanceFormatted;
-                end;
+                textelement("Balance")
+                {
+                    trigger OnBeforePassVariable()
+                    var
+                        GLEntryRec: Record "G/L Entry";
+                        BalanceAmount: Decimal;
+                        StartDate, EndDate : Date;
+                        Value: Text[18];
+                    begin
+                        BalanceAmount := 0;
+                        StartDate := CALCDATE('<-1M>', Today());
+                        EndDate := GetBalanceDate(Today());
+                        GLEntryRec.SetRange("G/L Account No.", GLAccount."No.");
+                        GLEntryRec.SetRange("Posting Date", StartDate, EndDate);
+
+                        if GLEntryRec.FindSet() then
+                            repeat
+                                BalanceAmount += GLEntryRec."Amount";
+                            until GLEntryRec.Next() = 0;
+
+                        Value := FORMAT(ROUND(BalanceAmount, 0.01), 0, '###########0.00');
+                        Value := PadStr(Value, 18, '0');
+                    end;
+                }
             }
         }
     }
@@ -71,7 +90,8 @@ xmlport 50501 "BalajustXMLport"
                     {
                         Caption = 'Export Date';
                     }
-                    field("FileName"; 'MONTHLY_BALANCE_' + Format(Today(), 0, '<Year><Month>') + '.txt')
+
+                    field("FileName"; 'MONTHLY_BALANCE_' + Format(CALCDATE('<-1M>', Today()), 0, 'yyyyMM') + '.txt')
                     {
                         Caption = 'File Name';
                     }
@@ -80,6 +100,17 @@ xmlport 50501 "BalajustXMLport"
         }
     }
 
+    procedure GetBalanceDate(CurrentDate: Date): Date
     var
-        Value: Text[18];
+        LastDayPrevMonth: Date;
+        DayOfWeek: Integer;
+    begin
+        LastDayPrevMonth := CALCDATE('<-1M>', CurrentDate);
+        DayOfWeek := Date2DWY(LastDayPrevMonth, 1);
+
+        if DayOfWeek in [6, 7] then
+            LastDayPrevMonth := CALCDATE('<-1D>', LastDayPrevMonth);
+
+        exit(LastDayPrevMonth);
+    end;
 }

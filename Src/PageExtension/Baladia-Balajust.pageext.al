@@ -17,7 +17,7 @@ pageextension 50500 "ChartOfAccountsExt" extends "Chart of Accounts"
                     FileName: Text[100];
                 begin
                     FileName := 'Daily_BALANCE_' + Format(Today(), 0, '<Year><Month>') + '.txt';
-                    Xmlport.Run(50500, true, false);
+                    Xmlport.Run(50502, true, false);
                 end;
             }
             action(MonthyExport)
@@ -33,7 +33,7 @@ pageextension 50500 "ChartOfAccountsExt" extends "Chart of Accounts"
                     FileName: Text[100];
                 begin
                     FileName := 'MONTHLY_BALANCE_' + Format(Today(), 0, '<Year><Month>') + '.txt';
-                    Xmlport.Run(50501, true, false);
+                    Xmlport.Run(50503, true, false);
                 end;
             }
         }
