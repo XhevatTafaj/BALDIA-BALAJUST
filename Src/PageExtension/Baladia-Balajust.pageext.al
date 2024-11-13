@@ -15,12 +15,21 @@ pageextension 50500 "ChartOfAccountsExt" extends "Chart of Accounts"
                 trigger OnAction()
                 var
                     FileName: Text[100];
+                    TempBlob: Codeunit "Temp Blob";
+                    Outstream: OutStream;
+                    Ins: InStream;
+                    FileContent: BigText;
+                    Position: Integer;
                 begin
-                    FileName := 'Daily_BALANCE_' + Format(Today(), 0, '<Year><Month>') + '.txt';
-                    Xmlport.Run(50502, true, false);
+                    FileName := 'DAILY_BALANCE_' + Format(Today(), 0, 'yyyyMMdd') + '.txt';
+                    TempBlob.CreateOutStream(Outstream);
+                    Xmlport.Export(50502, Outstream);
+                    TempBlob.CreateInStream(Ins);
+                    DownloadFromStream(Ins, FileName, '', 'text/plain', FileName);
+
                 end;
             }
-            action(MonthyExport)
+            action(MonthlyExport)
             {
                 Caption = 'Monthly Export';
                 Image = Export;
@@ -31,12 +40,17 @@ pageextension 50500 "ChartOfAccountsExt" extends "Chart of Accounts"
                 trigger OnAction()
                 var
                     FileName: Text[100];
+                    TempBlob: Codeunit "Temp Blob";
+                    Outstream: OutStream;
+                    Ins: InStream;
                 begin
-                    FileName := 'MONTHLY_BALANCE_' + Format(Today(), 0, '<Year><Month>') + '.txt';
-                    Xmlport.Run(50503, true, false);
+                    FileName := 'MONTHLY_BALANCE_' + Format(Today(), 0, 'yyyyMMdd') + '.txt';
+                    TempBlob.CreateOutStream(Outstream);
+                    Xmlport.Export(50503, Outstream);
+                    TempBlob.CreateInStream(Ins);
+                    DownloadFromStream(Ins, FileName, '', 'text/plain', FileName);
                 end;
             }
         }
-
     }
 }
