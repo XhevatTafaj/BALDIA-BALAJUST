@@ -18,26 +18,29 @@ xmlport 50503 "MonthlyBalanceXMLport1"
                         Value: Text[8];
                     begin
                         BalanceDate := GetBalanceDate(Today());
-                        Value := Format(BalanceDate, 0, 'yyyyMMdd');
+                        Value := Format(BalanceDate, 0);
+                        Date := Value;
+
                     end;
                 }
 
-                textelement("Account")
+                fieldelement(Account; GLAccount."No.")
                 {
-                    trigger OnBeforePassVariable()
+                    trigger OnBeforePassField()
                     var
                         Value: Text[7];
                     begin
                         Value := Format(GLAccount."No.", 7, '0');
                     end;
                 }
-                /* textelement("Center")
+                textelement("Center")
                 {
                     trigger OnBeforePassVariable()
                     var
                         Value: Text[4];
                     begin
-                        Value := '0001';
+                        Value := '001';
+                        Center := Format(Value);
                     end;
                 }
                 textelement("Currency")
@@ -47,12 +50,13 @@ xmlport 50503 "MonthlyBalanceXMLport1"
                         Value: Text[3];
                     begin
                         Value := 'EUR';
+                        Currency := Format(Value);
                     end;
-                } */
+                }
 
-                textelement("Balance")
+                fieldelement(Balance; GLAccount.Balance)
                 {
-                    trigger OnBeforePassVariable()
+                    trigger OnBeforePassField()
                     var
                         Value: Text[18];
                     begin
@@ -94,9 +98,11 @@ xmlport 50503 "MonthlyBalanceXMLport1"
         LastDayPrevMonth := CALCDATE('<-1M>', CurrentDate);
         DayOfWeek := Date2DWY(LastDayPrevMonth, 1);
 
-        if DayOfWeek in [6, 7] then
+        if DayOfWeek = 6 then
             LastDayPrevMonth := CALCDATE('<-1D>', LastDayPrevMonth);
-
+        if DayOfWeek = 7 then
+            LastDayPrevMonth := CALCDATE('<-2D>', LastDayPrevMonth);
         exit(LastDayPrevMonth);
     end;
 }
+

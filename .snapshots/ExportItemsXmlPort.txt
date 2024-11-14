@@ -1,0 +1,1 @@
+﻿"No.","Description","Type","Inventory","Base Unit of Measure","Cost is Adjusted","Unit Cost","Unit Price","Vendor No.""1000","Bicicletta","Inventory","32","PZ","No","350,595","4.000,00",""
