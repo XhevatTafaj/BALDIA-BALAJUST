@@ -18,6 +18,21 @@
       "tenant": "default",
       "usePublicURLFromServer": true,
       "schemaUpdateMode": "ForceSync"
-    }
+    },
+    {
+      "name": "AvantMoneyDev",
+      "request": "launch",
+      "type": "al",
+      "environmentType": "Sandbox",
+      "environmentName": "AvantMoneyDev",
+      "tenant": "c37d7c16-d7c7-4558-93d2-a635b596c203",
+      "authentication": "AAD",
+      "breakOnError": true,
+      "launchBrowser": true,
+      "enableLongRunningSqlStatements": true,
+      "enableSqlInformationDebugger": true,
+      "schemaUpdateMode": "ForceSync",
+"dependencyPublishingOption": "Ignore"
+  }
   ]
 }
