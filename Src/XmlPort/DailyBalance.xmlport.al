@@ -1,5 +1,8 @@
 
-xmlport 50502 "DailyBalanceXMLport1"
+namespace AvantMoney.ExportDailyMonthly;
+using Microsoft.Finance.GeneralLedger.Account;
+
+xmlport 50502 "PTE Baldia Daily Balance"
 {
     Format = VariableText;
     TextEncoding = UTF8;
@@ -89,4 +92,11 @@ xmlport 50502 "DailyBalanceXMLport1"
             }
         }
     }
+
+    procedure SetBalanceDate(BalanceDate: Date)
+    var
+        myInt: Integer;
+    begin
+
+    end;
 }

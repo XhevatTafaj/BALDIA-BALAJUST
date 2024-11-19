@@ -1,3 +1,6 @@
+namespace AvantMoney.ExportDailyMonthly;
+using System.Utilities;
+using Microsoft.Finance.GeneralLedger.Account;
 pageextension 50500 "ChartOfAccountsExt" extends "Chart of Accounts"
 {
     actions

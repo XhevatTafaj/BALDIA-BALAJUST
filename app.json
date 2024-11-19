@@ -2,7 +2,7 @@
   "id": "ea0b1a52-16d8-4ab0-bf05-a32e8bcbd6ac",
   "name": "BALDIA-BALAJUST",
   "publisher": "Default Publisher",
-  "version": "1.0.0.0",
+  "version": "1.0.0.10",
   "brief": "",
   "description": "",
   "privacyStatement": "",
@@ -25,6 +25,7 @@
     "allowDownloadingSource": true,
     "includeSourceInSymbolFile": true
   },
+  "target": "Cloud",
   "runtime": "12.0",
   "features": [
     "NoImplicitWith"

@@ -1,3 +1,6 @@
+namespace AvantMoney.ExportDailyMonthly;
+using Microsoft.Finance.GeneralLedger.Account;
+
 xmlport 50503 "MonthlyBalanceXMLport1"
 {
     Format = VariableText;
