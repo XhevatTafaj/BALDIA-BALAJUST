@@ -1,5 +1,6 @@
 namespace AvantMoney.ExportDailyMonthly;
 using Microsoft.Finance.GeneralLedger.Account;
+using System.Utilities;
 
 xmlport 50503 "MonthlyBalanceXMLport1"
 {
@@ -13,60 +14,47 @@ xmlport 50503 "MonthlyBalanceXMLport1"
         {
             tableelement("GLAccount"; "G/L Account")
             {
-                textelement("Date")
+                textelement(DateOfTheBalance)
                 {
                     trigger OnBeforePassVariable()
-                    var
-                        BalanceDate: Date;
-                        Value: Text[8];
                     begin
-                        BalanceDate := GetBalanceDate(Today());
-                        Value := Format(BalanceDate, 0);
-                        Date := Value;
-
+                        DateOfTheBalance := Format(BalanceDate, 0, '<Year4><Month,2><Day,2>');
                     end;
                 }
-
                 fieldelement(Account; GLAccount."No.")
                 {
-                    trigger OnBeforePassField()
-                    var
-                        Value: Text[7];
+                }
+                textelement(CenterValue)
+                {
+                    trigger OnBeforePassVariable()
                     begin
-                        Value := Format(GLAccount."No.", 7, '0');
+                        CenterValue := '0001';
                     end;
                 }
-                textelement("Center")
+                textelement(CurrencyValue)
+                {
+                    trigger OnBeforePassVariable()
+                    begin
+                        CurrencyValue := 'EUR';
+                    end;
+                }
+                textelement(BalanceAtDate)
                 {
                     trigger OnBeforePassVariable()
                     var
-                        Value: Text[4];
+                        BalanceFormated: Text;
+                        FormatedValue: Text[18];
+                        i: Integer;
+                        CharsToAdd: Text;
                     begin
-                        Value := '001';
-                        Center := Format(Value);
-                    end;
-                }
-                textelement("Currency")
-                {
-                    trigger OnBeforePassVariable()
-                    var
-                        Value: Text[3];
-                    begin
-                        Value := 'EUR';
-                        Currency := Format(Value);
+                        BalanceAtDate := DailyMonthlyExport.FormatBalanceAtDate(GLAccount."Balance at Date");
                     end;
                 }
 
-                fieldelement(Balance; GLAccount.Balance)
-                {
-                    trigger OnBeforePassField()
-                    var
-                        Value: Text[18];
-                    begin
-                        Value := FORMAT(GLAccount."Balance", 0, '###########0.00');
-                        Value := PadStr(Value, 18, '0');
-                    end;
-                }
+                trigger OnPreXmlItem()
+                begin
+                    GetBalanceDate();
+                end;
             }
         }
     }
@@ -93,19 +81,41 @@ xmlport 50503 "MonthlyBalanceXMLport1"
         }
     }
 
-    procedure GetBalanceDate(CurrentDate: Date): Date
     var
-        LastDayPrevMonth: Date;
-        DayOfWeek: Integer;
-    begin
-        LastDayPrevMonth := CALCDATE('<-1M>', CurrentDate);
-        DayOfWeek := Date2DWY(LastDayPrevMonth, 1);
+        DateRec: Record Date;
+        DailyMonthlyExport: Codeunit "PTE Daily/Monthly Export";
+        BalanceDate: Date;
 
-        if DayOfWeek = 6 then
-            LastDayPrevMonth := CALCDATE('<-1D>', LastDayPrevMonth);
-        if DayOfWeek = 7 then
-            LastDayPrevMonth := CALCDATE('<-2D>', LastDayPrevMonth);
-        exit(LastDayPrevMonth);
+    local procedure GetBalanceDate()
+    begin
+        if GLAccount.GetFilter("Date Filter") = '' then begin
+            GLAccount.SetRange("Date Filter", Today());
+            BalanceDate := Today();
+            exit;
+        end;
+
+        DateRec.Reset();
+        DateRec.SetRange("Period Type", DateRec."Period Type"::Date);
+        DateRec.SetFilter("Period Start", GLAccount.GetFilter("Date Filter"));
+        if not DateRec.FindLast() then
+            BalanceDate := Today()
+        else
+            BalanceDate := DateRec."Period Start";
     end;
+
+    // procedure GetBalanceDate(CurrentDate: Date): Date
+    // var
+    //     LastDayPrevMonth: Date;
+    //     DayOfWeek: Integer;
+    // begin
+    //     LastDayPrevMonth := CALCDATE('<-1M>', CurrentDate);
+    //     DayOfWeek := Date2DWY(LastDayPrevMonth, 1);
+
+    //     if DayOfWeek = 6 then
+    //         LastDayPrevMonth := CALCDATE('<-1D>', LastDayPrevMonth);
+    //     if DayOfWeek = 7 then
+    //         LastDayPrevMonth := CALCDATE('<-2D>', LastDayPrevMonth);
+    //     exit(LastDayPrevMonth);
+    // end;
 }
 

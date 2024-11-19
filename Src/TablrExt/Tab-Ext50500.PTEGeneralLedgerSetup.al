@@ -1,5 +1,6 @@
 namespace AvantMoney.ExportDailyMonthly;
 using Microsoft.Finance.GeneralLedger.Setup;
+using Microsoft.Foundation.Calendar;
 
 tableextension 50500 "PTE General Ledger Setup" extends "General Ledger Setup"
 {
@@ -26,6 +27,16 @@ tableextension 50500 "PTE General Ledger Setup" extends "General Ledger Setup"
         {
             Caption = 'Daily/Monthly Account Container';
             DataClassification = CustomerContent;
+        }
+        field(50503; "PTE Export Calendar Code"; Code[10])
+        {
+            Caption = 'Export Calendar Code';
+            TableRelation = "Base Calendar";
+        }
+        field(50504; "PTE Upload Files on Container"; Boolean)
+        {
+            Caption = 'Upload Files on Container';
+            TableRelation = "Base Calendar";
         }
     }
 

@@ -14,6 +14,7 @@ pageextension 50502 "PTE General Ledger Setup" extends "General Ledger Setup"
                 caption = 'Daily/Monthly Export';
                 field("PTE D.M. Account Name"; Rec."PTE D.M. Account Name")
                 {
+                    ApplicationArea = All;
                     ToolTip = 'Specifies the value of the Company Account Name field.';
                 }
                 field(CompanyKeyCtrl; CompanyKey)
@@ -33,7 +34,18 @@ pageextension 50502 "PTE General Ledger Setup" extends "General Ledger Setup"
                 }
                 field("PTE D.M. Account Container"; Rec."PTE D.M. Account Container")
                 {
+                    ApplicationArea = All;
                     ToolTip = 'Specifies the value of the Company Account Container field.';
+                }
+                field("PTE Export Calendar Code"; Rec."PTE Export Calendar Code")
+                {
+                    ApplicationArea = All;
+                    ToolTip = 'Specifies the value of the Export Calendar Code field.', Comment = '%';
+                }
+                field("PTE Upload Files on Container"; Rec."PTE Upload Files on Container")
+                {
+                    ApplicationArea = All;
+                    ToolTip = 'Specifies the value of the Upload Files on Container field.', Comment = '%';
                 }
             }
         }

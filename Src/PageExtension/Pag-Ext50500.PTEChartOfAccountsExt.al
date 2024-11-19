@@ -1,7 +1,7 @@
 namespace AvantMoney.ExportDailyMonthly;
 using System.Utilities;
 using Microsoft.Finance.GeneralLedger.Account;
-pageextension 50500 "ChartOfAccountsExt" extends "Chart of Accounts"
+pageextension 50500 "PTE ChartOfAccountsExt" extends "Chart of Accounts"
 {
     actions
     {
@@ -9,7 +9,7 @@ pageextension 50500 "ChartOfAccountsExt" extends "Chart of Accounts"
         {
             action(DailyExport)
             {
-                Caption = 'Daily Export';
+                Caption = 'Export Daily File Manualy';
                 Image = Export;
                 Promoted = true;
                 PromotedIsBig = true;
@@ -17,19 +17,10 @@ pageextension 50500 "ChartOfAccountsExt" extends "Chart of Accounts"
                 ApplicationArea = All;
                 trigger OnAction()
                 var
-                    FileName: Text[100];
-                    TempBlob: Codeunit "Temp Blob";
-                    Outstream: OutStream;
-                    Ins: InStream;
-                    FileContent: BigText;
-                    Position: Integer;
+                    DailyMonthlyExport: Codeunit "PTE Daily/Monthly Export";
                 begin
-                    FileName := 'DAILY_BALANCE_' + Format(Today(), 0, 'yyyyMMdd') + '.txt';
-                    TempBlob.CreateOutStream(Outstream);
-                    Xmlport.Export(50502, Outstream);
-                    TempBlob.CreateInStream(Ins);
-                    DownloadFromStream(Ins, FileName, '', 'text/plain', FileName);
-
+                    DailyMonthlyExport.EnableDownloadFileToLocal();
+                    DailyMonthlyExport.ExportDailyBalanceFileOnAzure(Today);
                 end;
             }
             action(MonthlyExport)

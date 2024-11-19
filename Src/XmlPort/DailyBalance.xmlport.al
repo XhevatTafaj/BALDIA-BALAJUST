@@ -1,6 +1,7 @@
 
 namespace AvantMoney.ExportDailyMonthly;
 using Microsoft.Finance.GeneralLedger.Account;
+using System.Utilities;
 
 xmlport 50502 "PTE Baldia Daily Balance"
 {
@@ -13,60 +14,50 @@ xmlport 50502 "PTE Baldia Daily Balance"
     {
         textelement(Root)
         {
-            tableelement("GLAccount"; "G/L Account")
+            tableelement(GLAccount; "G/L Account")
             {
-                textelement("Date")
+                CalcFields = "Balance at Date";
+                textelement(DateOfTheBalance)
                 {
                     trigger OnBeforePassVariable()
-                    var
-                        CurrentDate: Date;
-                        Value: Text[8];
                     begin
-                        CurrentDate := Today();
-                        Date := Format(CurrentDate, 0, '<Year4><Month,2><Day,2>');
+                        DateOfTheBalance := Format(BalanceDate, 0, '<Year4><Month,2><Day,2>');
                     end;
                 }
                 fieldelement(Account; GLAccount."No.")
                 {
-                    trigger OnBeforePassField()
-                    var
-                        Value: Text[7];
+                }
+                textelement(CenterValue)
+                {
+                    trigger OnBeforePassVariable()
                     begin
-                        Value := Format(GLAccount."No.", 7, '0');
+                        CenterValue := '0001';
                     end;
                 }
-                textelement("Center")
+                textelement(CurrencyValue)
+                {
+                    trigger OnBeforePassVariable()
+                    begin
+                        CurrencyValue := 'EUR';
+                    end;
+                }
+                textelement(BalanceAtDate)
                 {
                     trigger OnBeforePassVariable()
                     var
-                        Value: Text[4];
+                        BalanceFormated: Text;
+                        FormatedValue: Text[18];
+                        i: Integer;
+                        CharsToAdd: Text;
                     begin
-                        Value := '001';
-                        Center := Format(Value);
-                    end;
-                }
-                textelement("Currency")
-                {
-                    trigger OnBeforePassVariable()
-                    var
-                        Value: Text[3];
-                    begin
-                        Value := 'EUR';
-                        Currency := Format(Value);
+                        BalanceAtDate := DailyMonthlyExport.FormatBalanceAtDate(GLAccount."Balance at Date");
                     end;
                 }
 
-                fieldelement(Balance; GLAccount.Balance)
-                {
-                    trigger OnBeforePassField()
-                    var
-                        Value: Text[18];
-                    begin
-                        Value := FORMAT(GLAccount."Balance", 0, '###########0.00');
-                        Value := PadStr(Value, 18, '0');
-
-                    end;
-                }
+                trigger OnPreXmlItem()
+                begin
+                    GetBalanceDate();
+                end;
             }
         }
     }
@@ -93,10 +84,25 @@ xmlport 50502 "PTE Baldia Daily Balance"
         }
     }
 
-    procedure SetBalanceDate(BalanceDate: Date)
     var
-        myInt: Integer;
-    begin
+        DateRec: Record Date;
+        DailyMonthlyExport: Codeunit "PTE Daily/Monthly Export";
+        BalanceDate: Date;
 
+    local procedure GetBalanceDate()
+    begin
+        if GLAccount.GetFilter("Date Filter") = '' then begin
+            GLAccount.SetRange("Date Filter", Today());
+            BalanceDate := Today();
+            exit;
+        end;
+
+        DateRec.Reset();
+        DateRec.SetRange("Period Type", DateRec."Period Type"::Date);
+        DateRec.SetFilter("Period Start", GLAccount.GetFilter("Date Filter"));
+        if not DateRec.FindLast() then
+            BalanceDate := Today()
+        else
+            BalanceDate := DateRec."Period Start";
     end;
 }

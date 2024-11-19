@@ -17,14 +17,17 @@ table 50500 "PTE Daily/Monthly Register"
         field(1; "No."; Integer)
         {
             Caption = 'No.';
+            DataClassification = CustomerContent;
         }
         field(2; Identifier; Text[100])
         {
             Caption = 'Identifier';
+            DataClassification = CustomerContent;
         }
         field(3; "Created Date-Time"; DateTime)
         {
             Caption = 'Created Date-Time';
+            DataClassification = CustomerContent;
         }
         field(4; "Created by User"; Code[50])
         {
@@ -36,15 +39,18 @@ table 50500 "PTE Daily/Monthly Register"
         {
             Caption = 'Status';
             Editable = false;
+            DataClassification = CustomerContent;
         }
         field(6; "Export Date"; Date)
         {
             Caption = 'Export Date';
+            DataClassification = CustomerContent;
         }
         field(7; "Export File Type"; enum "PTE Export File Type")
         {
             Caption = 'Export File Type';
             Editable = false;
+            DataClassification = CustomerContent;
         }
         field(8; "File Name"; Text[1024])
         {
@@ -54,6 +60,17 @@ table 50500 "PTE Daily/Monthly Register"
         field(9; "Exported File"; Media)
         {
             Caption = 'Exported File';
+            DataClassification = CustomerContent;
+        }
+        field(10; "Error Text"; Text[2048])
+        {
+            Caption = 'Error Text';
+            DataClassification = CustomerContent;
+        }
+        field(11; "Error Text 2"; Text[2048])
+        {
+            Caption = 'Error Text 2';
+            DataClassification = CustomerContent;
         }
     }
 
@@ -73,6 +90,7 @@ table 50500 "PTE Daily/Monthly Register"
     }
 
     var
+        TempBlob: Codeunit "Temp Blob";
         FileManagement: Codeunit "File Management";
         PaymentsFileNotFoundErr: Label 'The original payment file was not found.\Export a new file from the Payment Journal window.';
         DialogTitle2_Txt: Label 'Download file...';
@@ -80,7 +98,7 @@ table 50500 "PTE Daily/Monthly Register"
 
         ExportToServerFile: Boolean;
 
-    procedure CreateNew(NewIdentifier: Code[20]; NewBankAccountNo: Code[20])
+    procedure CreateNew(NewIdentifier: Text[100]; FileType: Enum "PTE Export File Type")
     begin
         Reset();
         LockTable();
@@ -88,6 +106,7 @@ table 50500 "PTE Daily/Monthly Register"
         Init();
         "No." += 1;
         Identifier := NewIdentifier;
+        "Export File Type" := FileType;
         "Created Date-Time" := CurrentDateTime;
         "Created by User" := UserId;
         Insert();
@@ -118,6 +137,7 @@ table 50500 "PTE Daily/Monthly Register"
     procedure DownloadFileContent()
     var
         FileInStream: InStream;
+        FileOutStream: OutStream;
         TempFileName: Text;
     begin
         GetFileContentAsStream(FileInStream);
@@ -126,9 +146,20 @@ table 50500 "PTE Daily/Monthly Register"
             DownloadFromStream(FileInStream, DialogTitle2_Txt, '', FileManagement.GetToFilterText('', Rec."File Name"), TempFileName);
     end;
 
+    procedure UploadFileContent()
+    var
+        FileInStream: InStream;
+        TempFileName: Text;
+    begin
+        TempBlob.CreateInStream(FileInStream);
+        UploadIntoStream(DialogTitle2_Txt, '', FileManagement.GetToFilterText('', Rec."File Name"), TempFileName, FileInStream);
+        Rec."File Name" := TempFileName;
+        Rec."Exported File".ImportStream(FileInStream, Format("No.") + Format(CurrentDateTime()));
+        Rec.Modify();
+    end;
+
     procedure GetFileContentAsStream(var FileInStream: InStream)
     var
-        TempBlob: Codeunit "Temp Blob";
         FileOutStream: OutStream;
     begin
         Clear(FileInStream);
@@ -166,6 +197,23 @@ table 50500 "PTE Daily/Monthly Register"
     procedure EnableExportToServerFile()
     begin
         ExportToServerFile := true;
+    end;
+
+    procedure SetErrorMessage(ErrorText: Text)
+    begin
+        SetRecordErrorMessage("Error Text", "Error Text 2", ErrorText);
+    end;
+
+    local procedure SetRecordErrorMessage(var ErrorMessageField1: Text[2048]; var ErrorMessageField2: Text[2048]; ErrorText: Text)
+    var
+        ErrorText2: Text;
+    begin
+        ErrorMessageField2 := '';
+        ErrorMessageField1 := COPYSTR(ErrorText, 1, 2048);
+        if STRLEN(ErrorText) > 2048 then begin
+            ErrorText2 := COPYSTR(ErrorText, 2049, 4096);
+            ErrorMessageField2 := CopyStr(ErrorText2, 1, MaxStrLen(ErrorMessageField2));
+        end;
     end;
 }
 

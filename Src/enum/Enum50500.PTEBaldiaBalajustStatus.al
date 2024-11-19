@@ -7,9 +7,9 @@ enum 50500 "PTE Baldia Balajust Status"
     {
         Caption = ' ', Locked = true;
     }
-    value(1; "Exported")
+    value(1; "Exported as Blob")
     {
-        Caption = 'Exported';
+        Caption = 'Exported as Blob';
     }
     value(2; "Exported Localy")
     {
