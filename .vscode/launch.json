@@ -32,7 +32,22 @@
       "enableLongRunningSqlStatements": true,
       "enableSqlInformationDebugger": true,
       "schemaUpdateMode": "ForceSync",
-"dependencyPublishingOption": "Ignore"
-  }
+      "dependencyPublishingOption": "Ignore"
+    },
+    {
+      "name": "My Attach Local Server BC240",
+      "type": "al",
+      "request": "attach",
+      "server": "http://xhevat:8080/BC240/",
+      "serverInstance": "BC240",
+      "authentication": "Windows",
+      "breakOnError": true,
+      "breakOnRecordWrite": false,
+      "enableSqlInformationDebugger": true,
+      "enableLongRunningSqlStatements": true,
+      "longRunningSqlStatementsThreshold": 500,
+      "numberOfSqlStatements": 10,
+      "breakOnNext": "Background"
+    }
   ]
 }

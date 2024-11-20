@@ -40,6 +40,10 @@ page 50500 "PTE Daily/Monthly Registers"
                     ApplicationArea = All;
                     ToolTip = 'Specifies the value of the Export Date field.';
                 }
+                field("Balance Date"; Rec."Balance Date")
+                {
+                    ToolTip = 'Specifies the value of the Balance Date field.', Comment = '%';
+                }
                 field("File Name"; Rec."File Name")
                 {
                     ApplicationArea = All;
@@ -59,6 +63,10 @@ page 50500 "PTE Daily/Monthly Registers"
                 {
                     ApplicationArea = All;
                     ToolTip = 'Specifies the value of the Created by User field.';
+                }
+                field("Error Text"; Rec."Error Text")
+                {
+                    ToolTip = 'Specifies the value of the Error Text field.', Comment = '%';
                 }
             }
         }
@@ -95,7 +103,7 @@ page 50500 "PTE Daily/Monthly Registers"
             {
                 ApplicationArea = All;
                 Caption = 'Export File Manualy';
-                Image = DefaultFault;
+                Image = Export;
                 visible = false;
                 ToolTip = 'Exports File Manualy.';
 
@@ -111,7 +119,7 @@ page 50500 "PTE Daily/Monthly Registers"
             {
                 ApplicationArea = All;
                 Caption = 'Show File Content';
-                Image = DefaultFault;
+                Image = Default;
                 ToolTip = 'Show File Content.';
 
                 trigger OnAction()
@@ -123,7 +131,7 @@ page 50500 "PTE Daily/Monthly Registers"
             {
                 ApplicationArea = All;
                 Caption = 'Download File Content';
-                Image = DefaultFault;
+                Image = Download;
                 ToolTip = 'Downloads File Content.';
 
                 trigger OnAction()
@@ -131,18 +139,90 @@ page 50500 "PTE Daily/Monthly Registers"
                     Rec.DownloadFileContent();
                 end;
             }
-            action(UploadFileContent)
+            action("Show Error Message")
             {
                 ApplicationArea = All;
-                Caption = 'Upload File Content';
-                Image = DefaultFault;
-                ToolTip = 'Upload File Content.';
+                Caption = 'Show Error Message';
+                Enabled = Rec.Status = Rec.Status::"Error on Export";
+                Image = Error;
+                ToolTip = 'Show the error message that has stopped the entry.';
 
                 trigger OnAction()
                 begin
-                    Rec.UploadFileContent()
+                    Rec.ShowErrorMessage();
                 end;
+            }
+            // action("Show Error Call Stack")
+            // {
+            //     ApplicationArea = All;
+            //     Caption = 'Show Error Call Stack';
+            //     Enabled = Rec.Status = Rec.Status::"Error on Export";
+            //     Image = StepInto;
+            //     Promoted = true;
+            //     PromotedCategory = Process;
+            //     ToolTip = 'Show the call stack for the error that has stopped the entry.';
+
+            //     trigger OnAction()
+            //     begin
+            //         Rec.ShowErrorCallStack();
+            //     end;
+            // }
+            action(SetStatusToError)
+            {
+                ApplicationArea = All;
+                Caption = 'Set Status to Error';
+                Image = FaultDefault;
+                ToolTip = 'Change the status of the entry.';
+
+                trigger OnAction()
+                begin
+                    if Confirm(BankReconcilationLogQst, false) then
+                        Rec.MarkAsError();
+                end;
+            }
+            // action(UploadFileContent)
+            // {
+            //     ApplicationArea = All;
+            //     Caption = 'Upload File Content';
+            //     Image = DefaultFault;
+            //     ToolTip = 'Upload File Content.';
+
+            //     trigger OnAction()
+            //     begin
+            //         Rec.UploadFileContent()
+            //     end;
+            // }
+        }
+        area(Promoted)
+        {
+            group(Category_Process)
+            {
+                Caption = 'Process', Comment = 'Generated from the PromotedActionCategories property index 1.';
+
+                actionref(ExportFileManualy_Promoted; ExportFileManualy)
+                {
+                }
+                actionref(ShowFileContent_Promoted; ShowFileContent)
+                {
+                }
+                actionref(DownloadFileContent_Promoted; DownloadFileContent)
+                {
+                }
+            }
+            group(Category_Category5)
+            {
+                Caption = 'Errors', Comment = 'Generated from the PromotedActionCategories property index 4.';
+
+                actionref(ShowErrorMessage_Promoted; "Show Error Message")
+                {
+                }
+                actionref(SetStatusToError_Promoted; SetStatusToError)
+                {
+                }
             }
         }
     }
+
+    var
+        BankReconcilationLogQst: Label 'Are you sure you want to set the status to Error?';
 }

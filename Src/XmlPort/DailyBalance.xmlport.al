@@ -3,7 +3,7 @@ namespace AvantMoney.ExportDailyMonthly;
 using Microsoft.Finance.GeneralLedger.Account;
 using System.Utilities;
 
-xmlport 50502 "PTE Baldia Daily Balance"
+xmlport 50502 "PTE Daily Balance"
 {
     Format = VariableText;
     TextEncoding = UTF8;

@@ -25,7 +25,7 @@ pageextension 50500 "PTE ChartOfAccountsExt" extends "Chart of Accounts"
             }
             action(MonthlyExport)
             {
-                Caption = 'Monthly Export';
+                Caption = 'Export Monthly File Manualy';
                 Image = Export;
                 Promoted = true;
                 PromotedIsBig = true;
@@ -33,18 +33,28 @@ pageextension 50500 "PTE ChartOfAccountsExt" extends "Chart of Accounts"
                 ApplicationArea = All;
                 trigger OnAction()
                 var
-                    FileName: Text[100];
-                    TempBlob: Codeunit "Temp Blob";
-                    Outstream: OutStream;
-                    Ins: InStream;
+                    DailyMonthlyExport: Codeunit "PTE Daily/Monthly Export";
                 begin
-                    FileName := 'MONTHLY_BALANCE_' + Format(Today(), 0, 'yyyyMMdd') + '.txt';
-                    TempBlob.CreateOutStream(Outstream);
-                    Xmlport.Export(50503, Outstream);
-                    TempBlob.CreateInStream(Ins);
-                    DownloadFromStream(Ins, FileName, '', 'text/plain', FileName);
+                    DailyMonthlyExport.EnableDownloadFileToLocal();
+                    DailyMonthlyExport.ExportMonthlyBalanceFileOnAzure(Today);
                 end;
             }
+            action(ExportDailyMonthlyFiles)
+            {
+                Caption = 'Export Files Manualy';
+                Image = Export;
+                Promoted = true;
+                PromotedIsBig = true;
+                PromotedCategory = Process;
+                ApplicationArea = All;
+                trigger OnAction()
+                var
+                    DailyMonthlyExport: Codeunit "PTE Daily/Monthly Export";
+                begin
+                    DailyMonthlyExport.ExportDailyMonthlyFiles();
+                end;
+            }
+            //
         }
     }
 }

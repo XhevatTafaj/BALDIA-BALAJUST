@@ -17,6 +17,6 @@ enum 50500 "PTE Baldia Balajust Status"
     }
     value(3; "Error on Export")
     {
-        Caption = 'Error onExport';
+        Caption = 'Error on Export';
     }
 }
