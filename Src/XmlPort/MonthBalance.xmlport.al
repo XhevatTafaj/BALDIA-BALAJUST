@@ -70,11 +70,13 @@ xmlport 50503 "PTE Monthly Balance"
                     field("ExportDate"; Today())
                     {
                         Caption = 'Export Date';
+                        ApplicationArea = All;
                     }
 
                     field("FileName"; 'MONTHLY_BALANCE_' + Format(CALCDATE('<-1M>', Today()), 0, 'yyyyMM') + '.txt')
                     {
                         Caption = 'File Name';
+                        ApplicationArea = All;
                     }
                 }
             }

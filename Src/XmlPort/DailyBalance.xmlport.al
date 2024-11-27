@@ -73,11 +73,13 @@ xmlport 50502 "PTE Daily Balance"
                     field("ExportDate"; Today())
                     {
                         Caption = 'Export Date';
+                        ApplicationArea = All;
                     }
 
                     field("FileName"; 'DAILY_BALANCE_' + Format(Today(), 0, 'yyyyMMdd') + '.txt')
                     {
                         Caption = 'File Name';
+                        ApplicationArea = All;
                     }
                 }
             }

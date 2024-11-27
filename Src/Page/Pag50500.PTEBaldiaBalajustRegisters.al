@@ -67,6 +67,7 @@ page 50500 "PTE Daily/Monthly Registers"
                 field("Error Text"; Rec."Error Text")
                 {
                     ToolTip = 'Specifies the value of the Error Text field.', Comment = '%';
+                    ApplicationArea = All;
                 }
             }
         }

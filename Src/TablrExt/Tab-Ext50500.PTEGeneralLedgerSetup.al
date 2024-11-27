@@ -36,7 +36,6 @@ tableextension 50500 "PTE General Ledger Setup" extends "General Ledger Setup"
         field(50504; "PTE Upload Files on Container"; Boolean)
         {
             Caption = 'Upload Files on Container';
-            TableRelation = "Base Calendar";
         }
     }
 
