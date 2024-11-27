@@ -12,8 +12,9 @@ xmlport 50503 "PTE Monthly Balance"
     {
         textelement(Root)
         {
-            tableelement("GLAccount"; "G/L Account")
+            tableelement(GLAccount; "G/L Account")
             {
+                CalcFields = "Balance at Date";
                 textelement(DateOfTheBalance)
                 {
                     trigger OnBeforePassVariable()

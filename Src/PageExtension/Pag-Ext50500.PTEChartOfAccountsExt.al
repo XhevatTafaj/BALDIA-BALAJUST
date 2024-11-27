@@ -54,7 +54,6 @@ pageextension 50500 "PTE ChartOfAccountsExt" extends "Chart of Accounts"
                     DailyMonthlyExport.ExportDailyMonthlyFiles();
                 end;
             }
-            //
         }
     }
 }
