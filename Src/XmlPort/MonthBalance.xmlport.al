@@ -7,6 +7,7 @@ xmlport 50503 "PTE Monthly Balance"
     Format = VariableText;
     TextEncoding = UTF8;
     Direction = Export;
+    FieldDelimiter = '';
     TableSeparator = '<NewLine>';
     schema
     {

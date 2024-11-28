@@ -8,6 +8,7 @@ xmlport 50502 "PTE Daily Balance"
     Format = VariableText;
     TextEncoding = UTF8;
     Direction = Export;
+    FieldDelimiter = '';
     TableSeparator = '<NewLine>';
 
     schema
