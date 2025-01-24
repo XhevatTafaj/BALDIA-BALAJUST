@@ -15,7 +15,7 @@ codeunit 50500 "PTE Daily/Monthly Export"
 
     var
         DateRec: Record Date;
-        GeneralLedgerSetup: Record "General Ledger Setup";
+        BlobSetupSetup: Record "PTE Daily/Monthly Export Setup";
         FileManagement: Codeunit "File Management";
         TempBlob: Codeunit "Temp Blob";
         DownloadFileToLocal: Boolean;
@@ -109,6 +109,7 @@ codeunit 50500 "PTE Daily/Monthly Export"
         Encoding: TextEncoding;
         FileStatus: enum "PTE Baldia Balajust Status";
         BalanceDate: Date;
+        ResponseError: Text;
         InStr: InStream;
     begin
         if TargetDate = 0D then
@@ -132,7 +133,7 @@ codeunit 50500 "PTE Daily/Monthly Export"
         Clear(DailyMonthlyRegister);
         DailyMonthlyRegister.CreateNew(MessageID, FileType, TargetDate, BalanceDate);
 
-        GeneralLedgerSetup.GetRecordOnce();
+        BlobSetupSetup.GetRecordOnce();
         if IsNonWorkingDay(TargetDate) then begin
             DailyMonthlyRegister.FindLast();
             ErrorMessage := StrSubstNo(IsNotWorkingDayErr, TargetDate);
@@ -153,19 +154,23 @@ codeunit 50500 "PTE Daily/Monthly Export"
         FileName := BlobFileName;
         FileCreated := GenerateDailyBalanceFile(TempBlob, XMLPortID, GlAccount);
         TempBlob.CreateInStream(InStr);
-        if GeneralLedgerSetup."PTE Upload Files on Container" and FileCreated then begin
-            InitializeABSBlobClient(ABSBlobClient);
+        if BlobSetupSetup."Upload Files on Container" and FileCreated then begin
+            InitializeABSBlobClient(ABSBlobClient, true);
+            if BlobSetupSetup."Blob Service SAS URL" <> '' then
+                SetBaseUrl(ABSBlobClient, BlobSetupSetup."Blob Service SAS URL");
             ABSOperationResponse := ABSBlobClient.DeleteBlob(BlobFileName);
             OnBeforeUploadFileToContainer(ABSBlobClient, ABSOperationResponse, BlobFileName, TempBlob, DailyMonthlyRegister, Result, IsHandled);
             if IsHandled then
                 exit(Result);
 
-            FileCreatedOnContainer := UploadFileToContainer(ABSBlobClient, ABSOperationResponse, BlobFileName, InStr);
+            FileCreatedOnContainer := UploadFileToContainer(ABSBlobClient, ABSOperationResponse, BlobFileName, InStr, ResponseError);
             if not FileCreatedOnContainer then begin
                 DailyMonthlyRegister.FindLast();
                 ErrorMessage := StrSubstNo(FileNotUploadedErr, TargetDate);
+                if ResponseError <> '' then
+                    ErrorMessage := ErrorMessage + ' \' + ResponseError;
                 SetDailyMonthlyRegisterToFileError(DailyMonthlyRegister, FileStatus::"Error on Export", ErrorMessage);
-            end
+            end;
         end;
 
         DailyMonthlyRegister.FindLast();
@@ -214,30 +219,63 @@ codeunit 50500 "PTE Daily/Monthly Export"
         DownloadFileToLocal := true;
     end;
 
-    local procedure InitializeABSBlobClient(var ABSBlobClient: Codeunit "ABS Blob Client")
+    procedure SetBaseUrl(var ABSBlobClient: Codeunit "ABS Blob Client"; BaseUrl: Text)
+    begin
+        ABSBlobClient.SetBaseUrl(BaseUrl);
+    end;
+
+    local procedure InitializeABSBlobClient(var ABSBlobClient: Codeunit "ABS Blob Client"; UseReadySAS: Boolean)
+    var
+        StorageServiceAuthorization: Codeunit "Storage Service Authorization";
+        Authorization: Interface "Storage Service Authorization";
+    begin
+        if UseReadySAS then
+            InitializeABSBlobClientUseReadySAS(ABSBlobClient)
+        else
+            InitializeABSBlobClientUseAccaountName(ABSBlobClient);
+    end;
+
+    local procedure InitializeABSBlobClientUseReadySAS(var ABSBlobClient: Codeunit "ABS Blob Client")
+    var
+        StorageServiceAuthorization: Codeunit "Storage Service Authorization";
+        Authorization: Interface "Storage Service Authorization";
+        SASTokenKey: Text;
+    begin
+        BlobSetupSetup.GetRecordOnce();
+        SASTokenKey := BlobSetupSetup.GetPassword("PTE Azure Access Type"::"SAS Token");
+        Authorization := StorageServiceAuthorization.UseReadySAS(SASTokenKey);
+        ABSBlobClient.Initialize(BlobSetupSetup."Storage Name", BlobSetupSetup."Container Name", Authorization);
+    end;
+
+    local procedure InitializeABSBlobClientUseAccaountName(var ABSBlobClient: Codeunit "ABS Blob Client")
     var
         StorageServiceAuthorization: Codeunit "Storage Service Authorization";
         Authorization: Interface "Storage Service Authorization";
         AccountAccesKey: Text;
         AccountName: Text[250];
     begin
-        GeneralLedgerSetup.GetRecordOnce();
-        GeneralLedgerSetup.TestField("PTE D.M. Account Name");
-        GeneralLedgerSetup.TestField("PTE D.M. Account Access Key");
-        GeneralLedgerSetup.TestField("PTE D.M. Account Container");
+        BlobSetupSetup.GetRecordOnce();
+        BlobSetupSetup.TestField("Account Name");
+        BlobSetupSetup.TestField("Account Access Key");
+        BlobSetupSetup.TestField("Container Name");
 
-        AccountName := GeneralLedgerSetup."PTE D.M. Account Name";
-        ContainerName := GeneralLedgerSetup."PTE D.M. Account Container";
-        AccountAccesKey := GeneralLedgerSetup.PTEGetPassword();
+        AccountName := BlobSetupSetup."Account Name";
+        ContainerName := BlobSetupSetup."Container Name";
+        AccountAccesKey := BlobSetupSetup.GetPassword("PTE Azure Access Type"::"Account Name");
 
         Authorization := StorageServiceAuthorization.CreateSharedKey(SecretText.SecretStrSubstNo('%1', AccountAccesKey));
         ABSBlobClient.Initialize(AccountName, ContainerName, Authorization);
     end;
 
-    local procedure UploadFileToContainer(var ABSBlobClient: Codeunit "ABS Blob Client"; var ABSOperationResponse: Codeunit "ABS Operation Response"; BlobName: Text; InStr: InStream): Boolean;
+    local procedure UploadFileToContainer(var ABSBlobClient: Codeunit "ABS Blob Client"; var ABSOperationResponse: Codeunit "ABS Operation Response"; BlobName: Text; InStr: InStream; var ResponseError: Text): Boolean;
     begin
         ABSOperationResponse := ABSBlobClient.PutBlobBlockBlobStream(BlobName, instr);
-        exit(true);
+        if ABSOperationResponse.IsSuccessful() then
+            exit(true)
+        else begin
+            ResponseError := ABSOperationResponse.GetError();
+            exit(false);
+        end;
     end;
 
     procedure FormatBalanceAtDate(BalanceAtDate: Decimal): Text
@@ -272,9 +310,9 @@ codeunit 50500 "PTE Daily/Monthly Export"
         CalendarManagement: Codeunit "Calendar Management";
         NonWorkinDay: Boolean;
     begin
-        GeneralLedgerSetup.GetRecordOnce();
-        GeneralLedgerSetup.TestField("PTE Export Calendar Code");
-        BaseCalendar.Get(GeneralLedgerSetup."PTE Export Calendar Code");
+        BlobSetupSetup.GetRecordOnce();
+        BlobSetupSetup.TestField("Export Calendar Code");
+        BaseCalendar.Get(BlobSetupSetup."Export Calendar Code");
         CalendarManagement.SetSource(BaseCalendar, CurrCalendarChange);
         CurrCalendarChange.Date := TargetDate;
         NonWorkinDay := CalendarManagement.IsNonworkingDay(TargetDate, CurrCalendarChange);

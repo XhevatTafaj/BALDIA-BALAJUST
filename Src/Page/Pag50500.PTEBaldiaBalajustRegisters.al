@@ -7,6 +7,8 @@ page 50500 "PTE Daily/Monthly Registers"
     PageType = List;
     Editable = false;
     SourceTable = "PTE Daily/Monthly Register";
+    SourceTableView = sorting("No.")
+                      order(descending);
     UsageCategory = History;
 
     layout
@@ -144,7 +146,7 @@ page 50500 "PTE Daily/Monthly Registers"
             {
                 ApplicationArea = All;
                 Caption = 'Show Error Message';
-                Enabled = Rec.Status = Rec.Status::"Error on Export";
+                Enabled = Rec."Error Text" <> '';
                 Image = Error;
                 ToolTip = 'Show the error message that has stopped the entry.';
 
