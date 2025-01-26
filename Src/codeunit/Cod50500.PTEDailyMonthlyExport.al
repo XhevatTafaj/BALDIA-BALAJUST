@@ -155,10 +155,12 @@ codeunit 50500 "PTE Daily/Monthly Export"
         FileCreated := GenerateDailyBalanceFile(TempBlob, XMLPortID, GlAccount);
         TempBlob.CreateInStream(InStr);
         if BlobSetupSetup."Upload Files on Container" and FileCreated then begin
-            InitializeABSBlobClient(ABSBlobClient, true);
+            InitializeABSBlobClient(ABSBlobClient, BlobSetupSetup."Use Ready SAS");
             if BlobSetupSetup."Blob Service SAS URL" <> '' then
                 SetBaseUrl(ABSBlobClient, BlobSetupSetup."Blob Service SAS URL");
-            ABSOperationResponse := ABSBlobClient.DeleteBlob(BlobFileName);
+            //if ABSBlobClient.BlobExists(BlobFileName) then
+            //    ABSOperationResponse := ABSBlobClient.DeleteBlob(BlobFileName);
+
             OnBeforeUploadFileToContainer(ABSBlobClient, ABSOperationResponse, BlobFileName, TempBlob, DailyMonthlyRegister, Result, IsHandled);
             if IsHandled then
                 exit(Result);

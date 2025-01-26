@@ -62,10 +62,17 @@ table 50501 "PTE Daily/Monthly Export Setup"
         {
             Caption = 'Export Calendar Code';
             TableRelation = "Base Calendar";
+            DataClassification = CustomerContent;
         }
         field(9; "Upload Files on Container"; Boolean)
         {
             Caption = 'Upload Files on Container';
+            DataClassification = CustomerContent;
+        }
+        field(10; "Use Ready SAS"; Boolean)
+        {
+            Caption = 'Use Ready SAS';
+            DataClassification = CustomerContent;
         }
     }
 
