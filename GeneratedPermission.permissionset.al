@@ -1,4 +1,7 @@
 namespace AvantMoney.ExportDailyMonthly;
+
+using AvantMoney.ExportDailyMonthly;
+
 permissionset 50500 "PTE Exp_DailyMonthly"
 {
     Caption = 'Export Daily Monthly Reports';
@@ -9,5 +12,8 @@ permissionset 50500 "PTE Exp_DailyMonthly"
         codeunit "PTE Isolated Storage Mgt." = X,
         xmlport "PTE Daily Balance" = X,
         xmlport "PTE Monthly Balance" = X,
-        page "PTE Daily/Monthly Registers" = X;
+        page "PTE Daily/Monthly Registers" = X,
+        tabledata "PTE Daily/Monthly Export Setup" = RIMD,
+        table "PTE Daily/Monthly Export Setup" = X,
+        page "PTE Daily/Monthly Export Setup" = X;
 }
