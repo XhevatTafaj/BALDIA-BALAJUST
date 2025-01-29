@@ -6,7 +6,6 @@ table 50501 "PTE Daily/Monthly Export Setup"
     Caption = 'Daily/Monthly Export Setup';
     LookupPageId = "PTE Daily/Monthly Export Setup";
     DrillDownPageId = "PTE Daily/Monthly Export Setup";
-    DataPerCompany = false;
 
     fields
     {
