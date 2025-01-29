@@ -241,10 +241,20 @@ table 50500 "PTE Daily/Monthly Register"
     var
         ErrorText: Text;
     begin
+        if not GuiAllowed() then
+            exit;
         ErrorText := GetErrorMessage();
         IF ErrorText = '' THEN
             ErrorText := NoErrorMessageTxt;
         MESSAGE(ErrorText);
+    end;
+
+    procedure HasErrorError(): Boolean
+    var
+        ErrorText: Text;
+    begin
+        ErrorText := GetErrorMessage();
+        exit(ErrorText <> '');
     end;
 
     procedure MarkAsError()

@@ -26,11 +26,11 @@ table 50501 "PTE Daily/Monthly Export Setup"
                         xRec.DeletePassword("PTE Azure Access Type"::"Account Name");
             end;
         }
-        field(3; "Account Name"; Text[250])
-        {
-            Caption = 'Daily/Monthly Account Name';
-            DataClassification = CustomerContent;
-        }
+        // field(3; "Account Name"; Text[250])
+        // {
+        //     Caption = 'Daily/Monthly Account Name';
+        //     DataClassification = CustomerContent;
+        // }
         field(4; "Storage Name"; Text[250])
         {
             Caption = 'Storage Name';

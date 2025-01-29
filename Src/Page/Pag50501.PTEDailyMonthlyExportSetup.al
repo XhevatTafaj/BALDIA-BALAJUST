@@ -18,12 +18,9 @@ page 50501 "PTE Daily/Monthly Export Setup"
             {
                 caption = 'General';
 
-                field("Account Name"; Rec."Account Name")
+                field("Storage Name"; Rec."Storage Name")
                 {
-                    ApplicationArea = All;
-                    //Visible = not UseReadySAS;
-                    Editable = not UseReadySAS;
-                    ToolTip = 'Specifies the value of the Company Account Name field.';
+                    ToolTip = 'Specifies the value of the Storage Name field.';
                 }
                 field(AccountAccessKeyCtrl; AccountAccessKey)
                 {
@@ -41,10 +38,6 @@ page 50501 "PTE Daily/Monthly Export Setup"
                                 PAGE.RunModal(PAGE::"Data Encryption Management");
                         Rec.SetPassword(AccountAccessKey, "PTE Azure Access Type"::"Account Name");
                     end;
-                }
-                field("Storage Name"; Rec."Storage Name")
-                {
-                    ToolTip = 'Specifies the value of the Storage Name field.';
                 }
                 field("Container Name"; Rec."Container Name")
                 {

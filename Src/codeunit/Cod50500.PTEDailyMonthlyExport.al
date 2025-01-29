@@ -158,8 +158,8 @@ codeunit 50500 "PTE Daily/Monthly Export"
             InitializeABSBlobClient(ABSBlobClient, BlobSetupSetup."Use Ready SAS");
             if BlobSetupSetup."Blob Service SAS URL" <> '' then
                 SetBaseUrl(ABSBlobClient, BlobSetupSetup."Blob Service SAS URL");
-            //if ABSBlobClient.BlobExists(BlobFileName) then
-            //    ABSOperationResponse := ABSBlobClient.DeleteBlob(BlobFileName);
+            if ABSBlobClient.BlobExists(BlobFileName) then
+                ABSOperationResponse := ABSBlobClient.DeleteBlob(BlobFileName);
 
             OnBeforeUploadFileToContainer(ABSBlobClient, ABSOperationResponse, BlobFileName, TempBlob, DailyMonthlyRegister, Result, IsHandled);
             if IsHandled then
@@ -189,6 +189,9 @@ codeunit 50500 "PTE Daily/Monthly Export"
 
         if DownloadFileToLocal and FileCreated then
             DownloadFromStream(InStr, DialogTitle2_Txt, FileManagement.Magicpath(), FileManagement.GetToFilterText('', FileName), FileName);
+
+        if DailyMonthlyRegister.HasErrorError() then
+            DailyMonthlyRegister.ShowErrorMessage();
 
         exit(DailyMonthlyRegister.Status = DailyMonthlyRegister.Status::"Exported as Blob");
     end;
@@ -257,14 +260,13 @@ codeunit 50500 "PTE Daily/Monthly Export"
         AccountName: Text[250];
     begin
         BlobSetupSetup.GetRecordOnce();
-        BlobSetupSetup.TestField("Account Name");
+        BlobSetupSetup.TestField("Storage Name");
         BlobSetupSetup.TestField("Account Access Key");
         BlobSetupSetup.TestField("Container Name");
 
-        AccountName := BlobSetupSetup."Account Name";
+        AccountName := BlobSetupSetup."Storage Name";
         ContainerName := BlobSetupSetup."Container Name";
-        AccountAccesKey := BlobSetupSetup.GetPassword("PTE Azure Access Type"::"Account Name");
-
+        AccountAccesKey := BlobSetupSetup.GetPassword("PTE Azure Access Type"::"Account Name"); //"BLOB ACCESS KEY";
         Authorization := StorageServiceAuthorization.CreateSharedKey(SecretText.SecretStrSubstNo('%1', AccountAccesKey));
         ABSBlobClient.Initialize(AccountName, ContainerName, Authorization);
     end;
